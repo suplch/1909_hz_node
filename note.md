@@ -574,3 +574,101 @@ console.log(token);
 const decoded = jwt.verify(token, public_key);
 console.log(decoded);
 ```
+
+
+
+```ecmascript 6
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads')
+    },
+    // 给上传文件重命名
+    filename: function (req, file, cb) {
+        var fileFormat = file.originalname.split('.');
+
+        cb(null, file.fieldname + '-' + Date.now() + "." + fileFormat[fileFormat.length - 1]);
+    }
+});
+
+const upload = multer({
+    storage: storage
+});
+
+
+const app = express();
+
+app.use('/static', express.static('public'));
+
+app.post('/upload-single', upload.single('logo'), function (req, res) {
+    console.log(req.file);
+
+    console.log('文件类型：%s', req.file.mimetype);
+    console.log('原始文件名：%s', req.file.originalname);
+    console.log((req.file.originalname).split("."));
+    console.log('文件大小：%s', req.file.size);
+    console.log('文件保存路径：%s', req.file.path);
+    console.log(req.body.username);
+    res.send({
+        ret_code: '0',
+        filepath: req.file.path
+    });
+});
+
+app.listen(3000);
+
+```
+前端
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="axios.min.js"></script>
+    <script>
+        function doUpload() {
+            /*
+            $.ajax({
+                url: '/upload-single',
+                type: 'POST',
+                cache: false, //不必须
+                data: new FormData($('#uploadForm')[0]),
+                processData: false,//必须
+                contentType: false,//必须
+                success: function(data) {
+                    console.log(data)
+                    if (data.ret_code === '0') {
+                        alert('上传成功 文件路径: ' + data.filepath)
+                    }
+                }
+            });
+            */
+
+              var instance = axios.create({
+                baseURL: '/',
+                timeout: 1000000,
+                headers: {
+                  "Content-Type": 'multipart/form-data'
+                }
+              });
+
+              instance.post('/upload-single', new FormData(document.getElementById('uploadForm'))).then((res) => {
+                console.log(res);
+                alert(JSON.stringify(res.data));
+              });
+        }
+    </script>
+</head>
+<body>
+    <form id="uploadForm" action="/upload-single" method="post" enctype="multipart/form-data">
+        <input type="file" name="logo" />
+        <input type="text" name="username" />
+        <input type="submit" value="表单提交">
+    </form>
+    <button onclick="doUpload()">ajax提交</button>
+</body>
+</html>
+```
+
