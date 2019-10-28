@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="axios.min.js"></script>
+</head>
+<body>
+
+    <script>
+        function addStudent() {
+
+            let user = {
+                name: document.getElementById('uname').value,
+                sex: document.getElementById('sexF').value,
+                age: document.getElementById('uage').value,
+                score: document.getElementById('uscore').value
+            };
+
+            axios.post('/add_student', user).then(function (result) {
+                console.log(result.data);
+            }).catch(function (err) {
+                console.log(err);
+            });
+
+        }
+    </script>
+
+    姓名: <input id="uname" type="text"><br/>
+    性别: <select id="sexF"><br/>
+        <option value="男">男</option>
+        <option value="女">女</option>
+    </select><br/>
+    年龄: <input id="uage" type="number"><br/>
+    分数: <input id="uscore" type="number"><br/>
+    <button onclick="addStudent()">创建</button><br/>
+
+
+    <script>
+
+
+
+    function search() {
+        let sexField = document.getElementById('sexField');
+        alert(sexField.value);
+
+
+        axios.get('/students?sex=' + sexField.value).then(function (result) {
+            console.log(result);
+            console.log(result.data);
+
+            let table = document.createElement('table');
+            table.border = 1;
+            let tbody = document.createElement('tbody');
+
+            let thead = document.createElement('thead');
+            thead.innerHTML = `
+                <tr>
+                    <th>姓名</th>
+                    <th>年龄</th>
+                    <th>性别</th>
+                    <th>分数</th>
+                </tr>
+            `;
+
+
+            for (let item of result.data) {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.age}</td>
+                    <td>${item.sex}</td>
+                    <td>${item.score}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+            table.appendChild(thead);
+            table.appendChild(tbody);
+
+            document.getElementById('container').innerHTML = '';
+            document.getElementById('container').appendChild(table);
+
+        }).catch(function (err) {
+            console.log(err);
+        })
+
+    }
+
+
+</script>
+    Hello world
+    性别
+    <select id="sexField">
+        <option value="男">男</option>
+        <option value="女">女</option>
+    </select>
+    <button onclick="search()">查询</button>
+    <div id="container">
+
+    </div>
+</body>
+</html>

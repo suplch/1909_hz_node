@@ -50,7 +50,7 @@ async function addStudent(student) {
     return new Promise(function (resolve, reject) {
         db.collection('students1904').insertOne(student, function (err, result) {
             if (err) {
-                reject(err);
+                return reject(err);
             }
             resolve({
                 count: result.insertedCount,
@@ -60,9 +60,22 @@ async function addStudent(student) {
     });
 }
 
+async function getStudents(filter) {
+    let db = await getStudentDB();
+    return new Promise(function (resolve, reject) {
+        db.collection('students1904').find(filter).toArray(function (err, result) {
+            if (err) {
+                return reject(err);
+            }
+            resolve(result)
+        });
+    });
+}
+
 
 module.exports = {
     getClient,
     getStudentDB,
-    addStudent
+    addStudent,
+    getStudents
 };
