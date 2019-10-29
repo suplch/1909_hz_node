@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="axios.min.js"></script>
+</head>
+<body>
+    <script>
+        function register() {
+            let uname = document.getElementById('uname').value.trim();
+            let upwd = document.getElementById('upwd').value.trim();
+            let confirmPwd = document.getElementById('confirmPwd').value.trim();
+
+            if (upwd !== confirmPwd) {
+                alert('密码不一致');
+                return;
+            }
+
+            axios.post('/register', {
+                name: uname,
+                password: upwd
+            }).then(function (result) {
+                console.log(result.data);
+            });
+        }
+    </script>
+    用户名:   <input id="uname" type="text">
+    密码:     <input id="upwd" type="password">
+    确认密码:  <input id="confirmPwd" type="password">
+    <button onclick="register()">注册</button>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="axios.min.js"></script>
+    <script>
+        function doUpload() {
+
+            // $.ajax({
+            //     url: '/upload-single',
+            //     type: 'POST',
+            //     cache: false, //不必须
+            //     data: new FormData($('#uploadForm')[0]),
+            //     processData: false,//必须
+            //     contentType: false,//必须
+            //     success: function(data) {
+            //         console.log(data)
+            //         if (data.ret_code === '0') {
+            //             alert('上传成功 文件路径: ' + data.filepath)
+            //         }
+            //     }
+            // });
+
+
+            var instance = axios.create({
+                baseURL: '/',
+                timeout: 1000000,
+                headers: {
+                    "Content-Type": 'multipart/form-data'
+                }
+            });
+
+            instance.post('/upload-single', new FormData(document.getElementById('uploadForm'))).then((res) => {
+                console.log(res);
+                alert(JSON.stringify(res.data));
+            });
+        }
+    </script>
+</head>
+<body>
+<form id="uploadForm" action="/upload-single" method="post" enctype="multipart/form-data">
+    <input type="file" name="logo" />
+    <input type="text" name="username" />
+    <input type="submit" value="表单提交">
+</form>
+<button onclick="doUpload()">ajax提交</button>
+</body>
+</html>

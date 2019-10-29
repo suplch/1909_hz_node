@@ -72,10 +72,40 @@ async function getStudents(filter) {
     });
 }
 
+async function getUser(name, password) {
+    let db = await getStudentDB();
+    return new Promise(function (resolve, reject) {
+        db.collection('users').findOne({name, password}, function (err, result) {
+            if (err) {
+                return reject(err);
+            }
+            resolve(result)
+        })
+    });
+}
+
+
+async function addUser(user) {
+    let db = await getStudentDB();
+    return new Promise(function (resolve, reject) {
+        db.collection('users').insertOne(user, function (err, result) {
+            if (err) {
+                return reject(err);
+            }
+            resolve({
+                count: result.insertedCount,
+                lastId: result.insertedId
+            })
+        })
+    });
+}
+
 
 module.exports = {
     getClient,
     getStudentDB,
     addStudent,
-    getStudents
+    getStudents,
+    addUser,
+    getUser
 };

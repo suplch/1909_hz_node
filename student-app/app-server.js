@@ -1,5 +1,25 @@
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+
+const multer = require('multer');
+
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads')
+    },
+    // 给上传文件重命名
+    filename: function (req, file, cb) {
+        var fileFormat = file.originalname.split('.');
+
+        cb(null, file.fieldname + '-' + Date.now() + "." + fileFormat[fileFormat.length - 1]);
+    }
+});
+
+const upload = multer({
+    storage: storage
+});
 
 
 const express = require('express');
@@ -9,7 +29,7 @@ const cookieParser = require('cookie-parser');
 const tokenParser = require('./middleware/token-parser');
 
 
-const {getStudents, addStudent} = require('./db_await');
+const {getStudents, addStudent, addUser, getUser} = require('./db_await');
 
 const app = express();
 
@@ -21,6 +41,29 @@ app.use(express.static(path.join(__dirname, 'static')));
 // 自定义中间件, 用来校验 cookie token
 app.use(tokenParser());
 
+app.post('/upload-single', upload.single('logo'), function (req, res) {
+    console.log(req.file);
+
+    console.log('文件类型：%s', req.file.mimetype);
+    console.log('原始文件名：%s', req.file.originalname);
+    console.log((req.file.originalname).split("."));
+    console.log('文件大小：%s', req.file.size);
+    console.log('文件保存路径：%s', req.file.path);
+    console.log(req.body.username);
+    res.send({
+        ret_code: '0',
+        filepath: req.file.path
+    });
+});
+
+app.get('/getimg', function (req, res) {
+
+
+    let p = path.resolve('.', 'uploads', 'logo-1572320581922.jpg');
+    console.log(p);
+
+    res.sendFile(p);
+});
 
 app.get('/hello', function (req, res) {
     res.send({name: 'hello 张三'});
@@ -49,12 +92,18 @@ app.post('/add_student', async function (req, res) {
 });
 
 
-app.post('/login', function (req, res) {
+app.post('/login', async function (req, res) {
     const {name, password} = req.body;
 
-    if (name === 'zhang' && password === '123') {
+    const md5 = crypto.createHash('md5');
 
-        jwt.sign({name: 'zhang'}, 'abcdefg', function (err, token) {
+    let pwd = md5.update(password).digest('hex');
+
+    let user = await getUser(name, pwd);
+    console.log(user);
+    if (user) {
+
+        jwt.sign({id: user._id, name: user.name}, 'abcdefg', function (err, token) {
             if (err) {
                 res.send({
                     ok: false,
@@ -76,7 +125,30 @@ app.post('/login', function (req, res) {
             msg: 'err'
         })
     }
-})
+});
+
+app.post('/register', async function (req, res) {
+    const {name, password} = req.body;
+
+    const md5 = crypto.createHash('md5');
+
+    let pwd = md5.update(password).digest('hex');
+
+
+    let ret = await addUser({name, password: pwd});
+
+    if (ret.count === 1) {
+        res.send({
+            ok: true,
+            msg: '注册ok'
+        })
+    } else {
+        res.send({
+            ok: false,
+            msg: '注册error'
+        })
+    }
+});
 
 
 

@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 let whiteList = [
     '/login',
-    '/students'
+    '/students',
 ];
 
 function matchWhiteList(url) {
@@ -32,6 +32,7 @@ module.exports = function () {
                     return;
                 }
 
+                req.user = user;
                 next();
             });
         }
